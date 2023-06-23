@@ -1,44 +1,67 @@
+
+        
 import streamlit as st
-import matplotlib.pyplot as plt
-import numpy as np
+import yfinance as yf
+import pandas as pd
 
-# Generate sample data
-x = np.linspace(0, 10, 100)
-y1 = np.sin(x)
-y2 = np.cos(x)
+class Graph:
+    def __init__(self, stock) -> None:    
+        
+        "Stock Symbol"
+        self.stock = stock
+            
+        self.period = st.sidebar.selectbox(
+            'Period?',
+            ("1d","5d","1mo","3mo","6mo","1y","2y","5y","10y","ytd","max"))
+        self.interval = st.sidebar.selectbox(
+            'Interval?',
+            ("1m","2m","5m","15m","30m","60m","90m","1h","1d","5d","1wk","1mo","3mo"))
+        
+        "Saving the Symbols in a list"
+        self.stock_list = self.stock.split()
+        
+        if self.stock:
+            self._check_extraction()
+        else:
+            exit() 
 
-# Set up Streamlit
-st.title('Multi-Line Interactive Graph')
-st.write('Adjust the slider to change the frequency of the sine and cosine curves.')
+        # display graph
+        if st.sidebar.button("Generate Graph"):
 
-# Create a slider for adjusting the frequency
-frequency = st.slider('Frequency', 1, 10, 1)
+            self._stock_price_graph()
 
-# Create the figure and axes
-fig, ax = plt.subplots()
+    def _check_extraction(self):
+        "Trying to extract data from yfinance"
+        try:
+            t = yf.Ticker(self.stock)
+            st.write("Works")
+        except:
+            st.write("Invalid Symbol")
+            exit()
 
-# Plot the lines
-line1, = ax.plot(x, y1, label='Sine')
-line2, = ax.plot(x, y2, label='Cosine')
+    def _stock_price_graph(self):
 
-# Add legend
-ax.legend()
+        st.line_chart(self._stock_price_data())
+        
+    def _stock_price_data(self):
 
-# Function to update the plot
-def update_plot():
-    # Update the y-values based on the frequency slider
-    line1.set_ydata(np.sin(frequency * x))
-    line2.set_ydata(np.cos(frequency * x))
-    
-    # Redraw the plot
-    fig.canvas.draw()
+        # fetching data
+        df = yf.download(
+        tickers = self.stock,
+        period = self.period,
+        interval = self.interval,
+        group_by = 'ticker',
+        prepost = False,
+        repair = True
+        )
 
-# Update the plot initially
-update_plot()
+        # collecting only closing information
+        columns_list = []
 
-# Display the plot in Streamlit
-st.pyplot(fig)
+        for col_name in df:
+            if col_name[1] == "Close":
+                columns_list.append(pd.DataFrame(df[col_name]))
+                
+        df_close = pd.concat(columns_list, axis=1)
 
-# Add a button to update the plot
-if st.button('Update Plot'):
-    update_plot()
+        return df_close
