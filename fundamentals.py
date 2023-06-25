@@ -76,11 +76,14 @@ class Fundamentals:
                             'Select the KPI Cluster?',
                             ('n.a.', 'shareprice'))
         
-        # extract list from pickle files
-        file_name = kpi_cluster + ".pickle"
-        with open(file_name, 'rb') as file:
-            columns_selected = pickle.load(file)
-        
+        if kpi_cluster == "n.a.":
+            columns_selected = []
+        else:
+            # extract list from pickle files
+            file_name = kpi_cluster + ".pickle"
+            with open(file_name, 'rb') as file:
+                columns_selected = pickle.load(file)
+            
         "Creating a filter"
         columns_all = list(df.columns)
         columns_all.sort()
