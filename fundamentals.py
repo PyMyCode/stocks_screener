@@ -1,11 +1,13 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import numpy as np
+import pickle
 
 class Fundamentals:
     # Constructor
     def __init__(self, stock):
+
+        print("\n\n\n"+"New")
 
         self.stock = stock
 
@@ -56,18 +58,37 @@ class Fundamentals:
         #setting the index
         df = df.set_index('symbol')
 
-        print(df)
+        columns_selected = self._columns_selected(df)
 
-        # column list all
-
-        columns_all = list(df.columns)
-        columns_all.sort()
-        
-        columns_selected = st.sidebar.multiselect("Select columns", columns_all)
-        columns_selected_size = len(columns_selected)
+        print("\n" + "After being called")
+        print(columns_selected)
+        print("\n")
         
         # display on streamlit
         df_display = df[columns_selected]
+
         st.dataframe(data = df_display)
 
-        # TODO: Switch Rows with columns while displaying
+    def _columns_selected(self, df):
+
+        "creating the kpi cluster selectbox"
+        kpi_cluster = st.sidebar.selectbox(
+                            'Select the KPI Cluster?',
+                            ('n.a.', 'shareprice'))
+        
+        # extract list from pickle files
+        file_name = kpi_cluster + ".pickle"
+        with open(file_name, 'rb') as file:
+            columns_selected = pickle.load(file)
+        
+        "Creating a filter"
+        columns_all = list(df.columns)
+        columns_all.sort()
+
+        columns_selected_2 = st.sidebar.multiselect("Select columns", columns_all)
+
+        # adding selected filter to the list
+        if len(columns_selected_2) > 0:
+            columns_selected = columns_selected + columns_selected_2
+        
+        return columns_selected
