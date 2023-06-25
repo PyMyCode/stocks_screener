@@ -62,7 +62,7 @@ class Fundamentals:
 
         columns_all = list(df.columns)
         columns_all.sort()
-
+        
         columns_selected = st.sidebar.multiselect("Select columns", columns_all)
         columns_selected_size = len(columns_selected)
         
@@ -70,4 +70,4 @@ class Fundamentals:
         df_display = df[columns_selected]
         st.dataframe(data = df_display)
 
-        # TODO: add a way to export as excel
+        # TODO: Switch Rows with columns while displaying
