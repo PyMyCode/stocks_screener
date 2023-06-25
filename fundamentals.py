@@ -67,7 +67,7 @@ class Fundamentals:
         # display on streamlit
         df_display = df[columns_selected]
 
-        st.dataframe(data = df_display)
+        st.table(data = df_display.T)
 
     def _columns_selected(self, df):
 
