@@ -7,8 +7,6 @@ class Fundamentals:
     # Constructor
     def __init__(self, stock):
 
-        print("\n\n\n"+"New")
-
         self.stock = stock
 
         self.stock_list = self.stock.split()
@@ -59,10 +57,6 @@ class Fundamentals:
         df = df.set_index('symbol')
 
         columns_selected = self._columns_selected(df)
-
-        print("\n" + "After being called")
-        print(columns_selected)
-        print("\n")
         
         # display on streamlit
         df_display = df[columns_selected]
