@@ -74,7 +74,7 @@ class Fundamentals:
         "creating the kpi cluster selectbox"
         kpi_cluster = st.sidebar.selectbox(
                             'Select the KPI Cluster?',
-                            ('n.a.', 'shareprice', 'dividend'))
+                            ('n.a.','basicinfo', 'shareprice', 'dividend'))
         
         if kpi_cluster == "n.a.":
             columns_selected = []
