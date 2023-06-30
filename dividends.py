@@ -46,6 +46,8 @@ class Dividends:
         # create graph
         self._dividend_rate_graph(df_yearly)
 
+        print(df_yearly)
+
     def _dividend_rate_graph(self, df):
 
         # setting the graph style
@@ -63,6 +65,9 @@ class Dividends:
         ax.set_ylabel('Dividend Rate')
         ax.set_title('Yearly Dividend Rate')
         
+        # showing all years with dividends
+        plt.xticks(df.index, rotation='vertical')
+
         # annotations
         ax.bar_label(ax.containers[0])
         
