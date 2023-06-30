@@ -1,6 +1,8 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.style as sty
 
 class Dividends:
     # Constructor
@@ -38,9 +40,32 @@ class Dividends:
     def _dividends_info(self):
 
         df = self.t.dividends
-
+        # grouping by year
         df_yearly = df.groupby(df.index.year).agg('sum')
 
-        st.bar_chart(df_yearly)
-        st.dataframe(df_yearly)
-        st.dataframe(df)
+        # create graph
+        self._dividend_rate_graph(df_yearly)
+
+    def _dividend_rate_graph(self, df):
+
+        # setting the graph style
+        sty.use(['dark_background'])
+
+        # setting overall font size
+        plt.rcParams['font.size'] = 8
+
+        # creating the subplot
+        fig, ax = plt.subplots()
+
+        # creating a barplot
+        ax.bar(df.index, df.values)
+        ax.set_xlabel('Year')
+        ax.set_ylabel('Dividend Rate')
+        ax.set_title('Yearly Dividend Rate')
+        
+        # annotations
+        ax.bar_label(ax.containers[0])
+        
+        st.pyplot(fig)
+
+
