@@ -40,6 +40,7 @@ class Dividends:
     def _dividends_info(self):
 
         df = self.t.dividends
+        
         # grouping by year
         df_yearly = df.groupby(df.index.year).agg('sum')
 
@@ -49,15 +50,18 @@ class Dividends:
         print(df_yearly)
 
     def _dividend_rate_graph(self, df):
+        
+        #TODO: SUperimpose a scatterplot on a barplot
 
         # setting the graph style
         sty.use(['dark_background'])
+        st.set_option('deprecation.showPyplotGlobalUse', False)
 
         # setting overall font size
-        plt.rcParams['font.size'] = 8
+        plt.rcParams['font.size'] = 12
 
         # creating the subplot
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(1000 / 100, 6))
 
         # creating a barplot
         ax.bar(df.index, df.values)
@@ -68,9 +72,9 @@ class Dividends:
         # showing all years with dividends
         plt.xticks(df.index, rotation='vertical')
 
-        # annotations
+        # annotations (show value on the )
         ax.bar_label(ax.containers[0])
-        
+
+        ax.legend()
+
         st.pyplot(fig)
-
-
