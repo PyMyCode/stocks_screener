@@ -1,9 +1,12 @@
 from math import nan
+from turtle import color
 import streamlit as st
 import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.style as sty
+import matplotlib.dates as mdates
+import matplotlib as mpl
 
 class Dividends:
     # Constructor
@@ -23,17 +26,27 @@ class Dividends:
             # splitting stock names
         else:
             exit()
+        
         # calling method to extract data
         df, df_sp, df_div = self._extraction_data()
 
         # calling method to convert data to yearly
         df_yearly = self._data_conversion_yearly(df_sp, df_div)
 
-        # calling method create dividend history graph
+        # calling method to create dividend history graph
         self._dividend_history_graph(df)
 
         # calculating dividend yield and dividend growth
-        self._dividend_parameters(df_yearly)
+        df_yield = self._dividend_parameters(df_yearly)
+
+        # calling method to yearly div
+        self._div_yearly_graph(df_yield)
+
+        # calling method to graph dividend growth
+        self._dg_graph(df_yield)
+
+        # calling method to graph dividend yield
+        self._dy_graph(df_yield)
 
 
     def _extraction_ticker(self):
@@ -77,9 +90,6 @@ class Dividends:
 
         # joining dataframes
         df = df_sp.join(df_div)
-        
-        print("Dividend Dates")
-        print(df[df["Dividends"].notnull()])
 
         return df, df_sp, df_div
 
@@ -97,21 +107,22 @@ class Dividends:
         # joining div and sp yearly data
         df_yearly = df_sp_yearly.join(df_div_yearly)
 
-        print("FINAL")
-        print(df_yearly.head(11))
-
         return df_yearly
     
     def _dividend_parameters(self, df_yearly):
 
         # calculating div growth based on Close sp
         df_yearly["DY"] = df_yearly.Dividends / df_yearly.Close
+        df_yearly["DY"] = df_yearly["DY"].fillna(0) # replacing Nan with 0
 
         # calculating dividend growth based on div
         df_yearly["DG"] = df_yearly.Dividends.pct_change()
+        df_yearly["DG"] = df_yearly["DG"].fillna(0) # replacing Nan with 0
 
         print("Yearly Div data")
         print(df_yearly.head(11))
+
+        return df_yearly
 
 
     def _dividend_history_graph(self, df):
@@ -121,11 +132,10 @@ class Dividends:
         st.set_option('deprecation.showPyplotGlobalUse', False)
 
         # setting overall font size
-        plt.rcParams['font.size'] = 8
+        plt.rcParams['font.size'] = 10
 
         # creating the subplot
-        fig, ax = plt.subplots(figsize=(20, 6))
-        #fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(30, 6))
 
         # Plot the line chart
         ax.plot(df.index, df.Close, label='Line Chart')
@@ -149,5 +159,80 @@ class Dividends:
         
         # Graph heading
         st.write("Dividend History")
+
+        # Text in the x-axis will be displayed in 'YYYY-mm' format.
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b'))
+
+        # Rotates and right-aligns the x labels so they don't crowd each other.
+        for label in ax.get_xticklabels(which='major'):
+            label.set(rotation=30, horizontalalignment='right')
+
+        
+        # Display the plot
+        st.pyplot(fig)
+
+    def _div_yearly_graph(self, df_yield):
+
+        # setting the graph style
+        sty.use(['dark_background'])
+
+        # setting overall font size
+        plt.rcParams['font.size'] = 12
+
+        # creating the subplot
+        fig, ax = plt.subplots(figsize=(30, 6))
+
+        for i, row in df_yield.iterrows():
+            
+            # Plot the bar chart
+            p = ax.bar(i, row["Dividends"], color = (1, 1, 1, 0.5))
+
+            ax.bar_label(p, fmt='%.2f')
+
+        # Graph heading
+        st.write("Yearly Dividends")
+
+        # Display the plot
+        st.pyplot(fig)
+
+    def _dg_graph(self, df_yield):
+
+        # setting overall font size
+        plt.rcParams['font.size'] = 12
+
+        # creating the subplot
+        fig, ax = plt.subplots(figsize=(30, 6))
+
+        for i, row in df_yield.iterrows():
+            
+            # Plot the bar chart
+            p = ax.bar(i, row["DG"] * 100) # converting to percentage
+
+            ax.bar_label(p, fmt='%.1f%%')
+
+        # Graph heading
+        st.write("Dividends Growth")
+
+        # Display the plot
+        st.pyplot(fig)
+
+    def _dy_graph(self, df_yield):
+
+        # setting overall font size
+        plt.rcParams['font.size'] = 12
+
+        # creating the subplot
+        fig, ax = plt.subplots(figsize=(30, 6))
+
+        for i, row in df_yield.iterrows():
+            
+            # Plot the bar chart
+            p = ax.bar(i, row["DY"] * 100) # converting to percentage
+
+            ax.bar_label(p, fmt='%.1f%%')
+
+        # Graph heading
+        st.write("Dividends Yield")
+
         # Display the plot
         st.pyplot(fig)
