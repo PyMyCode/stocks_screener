@@ -1,11 +1,19 @@
 
-        
 import streamlit as st
 from fundamentals import Fundamentals
 from graph import Graph
 from dividends import Dividends
 
+# Page configs
+st.set_page_config(
+    page_title="Pymycode Stock Screener",
+    page_icon="🧊",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 class App:
+
     def __init__(self) -> None:    
         
         "Imput Stock Symbol"

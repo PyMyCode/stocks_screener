@@ -5,9 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.style as sty
 
-# Page configs
-st.set_page_config(layout="wide") # streamlit pag uses compltet width
-
 class Dividends:
     # Constructor
     def __init__(self, stock):
