@@ -8,9 +8,6 @@ import matplotlib.style as sty
 # Page configs
 st.set_page_config(layout="wide") # streamlit pag uses compltet width
 
-# containers
-dividend_history_container = st.container()
-
 class Dividends:
     # Constructor
     def __init__(self, stock):
@@ -30,10 +27,16 @@ class Dividends:
         else:
             exit()
         # calling method to extract data
-        df = self._extraction_data()
+        df, df_sp, df_div = self._extraction_data()
+
+        # calling method to convert data to yearly
+        df_yearly = self._data_conversion_yearly(df_sp, df_div)
 
         # calling method create dividend history graph
         self._dividend_history_graph(df)
+
+        # calculating dividend yield and dividend growth
+        self._dividend_parameters(df_yearly)
 
 
     def _extraction_ticker(self):
@@ -81,7 +84,38 @@ class Dividends:
         print("Dividend Dates")
         print(df[df["Dividends"].notnull()])
 
-        return df
+        return df, df_sp, df_div
+
+    def _data_conversion_yearly(self, df_sp, df_div):
+        
+        print("Converting data to yearly")
+
+        # taking yearly means sp data
+        df_sp_yearly = df_sp.groupby(df_sp.index.year).agg('mean')
+        df_sp_yearly.index.name = "Year"
+
+        # taking yearly sums div data
+        df_div_yearly = df_div.groupby(df_div.index.year).agg("sum")
+
+        # joining div and sp yearly data
+        df_yearly = df_sp_yearly.join(df_div_yearly)
+
+        print("FINAL")
+        print(df_yearly.head(11))
+
+        return df_yearly
+    
+    def _dividend_parameters(self, df_yearly):
+
+        # calculating div growth based on Close sp
+        df_yearly["DY"] = df_yearly.Dividends / df_yearly.Close
+
+        # calculating dividend growth based on div
+        df_yearly["DG"] = df_yearly.Dividends.pct_change()
+
+        print("Yearly Div data")
+        print(df_yearly.head(11))
+
 
     def _dividend_history_graph(self, df):
 
@@ -115,9 +149,8 @@ class Dividends:
             # adding annotation
             ax.annotate(label, (x, y), textcoords="offset points", xytext=(0,50), ha='center',
                         arrowprops=dict(arrowstyle = '-', connectionstyle = 'arc3',facecolor='red'))
-
-        with dividend_history_container:
-            
-            st.write("Dividend History")
-            # Display the plot
-            st.pyplot(fig)
+        
+        # Graph heading
+        st.write("Dividend History")
+        # Display the plot
+        st.pyplot(fig)
